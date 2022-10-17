@@ -1,21 +1,24 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-
-char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9' };
+char squarePattern[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char mark;
 
-//Valeurs du carré magique (utilisé dans la détection de victoire)
+// Valeurs du carré magique (utilisé dans la détection de victoire)
 int magicSquare[9] = {4, 9, 2, 3, 5, 7, 8, 1, 6};
-//Egalitée = 0 | Victoire J1 = 1 | Victoire J2 = 2 | En cours = -1
+// Egalitée = 0 | Victoire J1 = 1 | Victoire J2 = 2 | En cours = -1
 int gameState;
-//Joueur 1 = nombre impair | Joueur 2 = nombre pair
+// Joueur 1 = nombre impair | Joueur 2 = nombre pair
 int playerTurn;
-//Case sélectionnée
+// Case sélectionnée
 int choice;
-//Scores
+// Scores
 int scorePlayer1 = 0;
 int scorePlayer2 = 0;
+
+// Choix dans le menu d'initialisation
+int choiceMenu;
 
 int main()
 {
@@ -26,16 +29,34 @@ int main()
     printf("Please enter your choice: ");
 
     // Get the user choice
-    int choice;
-    scanf("%d", &choice);
+    scanf("%d", &choiceMenu);
 
     // Check if the user choice is valid
-    if (choice == 1)
+    if (choiceMenu == 1)
     {
+
+        do
+        {
+            int game = oneVersusOneGame();
+
+            if (game == 1)
+            {
+                scorePlayer1++;
+            }
+            else if (game == 2)
+            {
+                scorePlayer2++;
+            }
+            printf("Player 1 score: %d\n", scorePlayer1);
+            printf("Player 2 score: %d\n", scorePlayer2);
+
+            printf("Do you want to play again ? (1 = yes, 0 = no)\n");
+            scanf("%d", &choiceMenu);
+
+        } while (choiceMenu == 1);
         // Start the game
-        oneVersusOneGame();
     }
-    else if (choice == 0)
+    else if (choiceMenu == 0)
     {
         // Quit the game
         return 0;
@@ -47,37 +68,16 @@ int main()
         return 0;
     }
 
-    while (gameState != -1)
-    {
-        int game = oneVersusOneGame();
-        // ask wich game mode to play
-
-        if (game == 1)
-        {
-            scorePlayer1++;
-        }
-        else if (game == 2)
-        {
-            scorePlayer2++;
-        }
-        printf("Player 1 score: %d\n", scorePlayer1);
-        printf("Player 2 score: %d\n", scorePlayer2);
-
-        printf("Do you want to play again ? (1 = yes, 0 = no)\n");
-        scanf("%d", &choice);
-        if (choice == 0)
-        {
-            gameState = -1;
-        }
-    }
 }
 
-
-int oneVersusOneGame() {
+int oneVersusOneGame()
+{
     gameState = -1;
     playerTurn = 1;
+    memcpy(square, squarePattern, sizeof(squarePattern));
 
-    do {
+    do
+    {
         board();
         playerTurn = (playerTurn % 2) ? 1 : 2;
 
@@ -88,32 +88,33 @@ int oneVersusOneGame() {
 
         if (choice == 1 && square[0] == '1')
             square[0] = mark;
-            
+
         else if (choice == 2 && square[1] == '2')
             square[1] = mark;
-            
+
         else if (choice == 3 && square[2] == '3')
             square[2] = mark;
-            
+
         else if (choice == 4 && square[3] == '4')
             square[3] = mark;
-            
+
         else if (choice == 5 && square[4] == '5')
             square[4] = mark;
-            
+
         else if (choice == 6 && square[5] == '6')
             square[5] = mark;
-            
+
         else if (choice == 7 && square[6] == '7')
             square[6] = mark;
-            
+
         else if (choice == 8 && square[7] == '8')
             square[7] = mark;
-            
+
         else if (choice == 9 && square[8] == '9')
             square[8] = mark;
 
-        else {
+        else
+        {
             printf("Case invalide");
             playerTurn--;
         }
@@ -126,10 +127,7 @@ int oneVersusOneGame() {
     board();
 
     return gameState;
-
 }
-
-int oneVersusOneGame() {} // return 1 if player 1 win, 2 if player 2 win, 0 if draw
 
 // Affichage de la grille
 void board()
@@ -180,14 +178,17 @@ bool hasWon(char player)
     return false;
 }
 
-
-//Affichage Victoire
-int printWinner() {
-    if(hasWon('X')) {
+// Affichage Victoire
+int printWinner()
+{
+    if (hasWon('X'))
+    {
         gameState = 1;
         printf("Le joueur 1 (X) gagne la partie !");
         return 1;
-    } else if(hasWon('O')) {
+    }
+    else if (hasWon('O'))
+    {
         gameState = 1;
         printf("Le joueur 2 (O) gagne la partie !");
         return 2;
