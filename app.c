@@ -1,25 +1,78 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-
-char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9' };
+char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 int magicSquare[9] = {4, 9, 2, 3, 5, 7, 8, 1, 6};
+int scorePlayer1 = 0;
+int scorePlayer2 = 0;
 
-//Non démarrée = 0 | Joueur 1 = 1 | Joueur 2 = 2 | Finie = -1
+// Non démarrée = 0 | Joueur 1 = 1 | Joueur 2 = 2 | Finie = -1
 int gameState = 0;
 
-int main () {
+int main()
+{
+    // Print the menu
+    printf("Welcome to the Tic Tac Toe game !\n");
+    printf("1. Start a new game\n");
+    printf("0. Quit\n");
+    printf("Please enter your choice: ");
 
+    // Get the user choice
+    int choice;
+    scanf("%d", &choice);
+
+    // Check if the user choice is valid
+    if (choice == 1)
+    {
+        // Start the game
+        oneVersusOneGame();
+    }
+    else if (choice == 0)
+    {
+        // Quit the game
+        return 0;
+    }
+    else
+    {
+        // Invalid choice
+        printf("Invalid choice !\n");
+        return 0;
+    }
+
+    while (gameState != -1)
+    {
+        int game = oneVersusOneGame();
+        // ask wich game mode to play
+
+        if (game == 1)
+        {
+            scorePlayer1++;
+        }
+        else if (game == 2)
+        {
+            scorePlayer2++;
+        }
+        printf("Player 1 score: %d\n", scorePlayer1);
+        printf("Player 2 score: %d\n", scorePlayer2);
+
+        printf("Do you want to play again ? (1 = yes, 0 = no)\n");
+        scanf("%d", &choice);
+        if (choice == 0)
+        {
+            gameState = -1;
+        }
+    }
 }
 
-//Affichage de la grille
+int oneVersusOneGame() {} // return 1 if player 1 win, 2 if player 2 win, 0 if draw
+
+// Affichage de la grille
 void board()
 {
     system("cls");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Joueur 1 (X)  -  Joueur 2 (O)\n\n\n");
-
 
     printf("     |     |     \n");
     printf("  %c  |  %c  |  %c \n", square[0], square[1], square[2]);
@@ -37,14 +90,21 @@ void board()
     printf("     |     |     \n\n");
 }
 
-//Détection de victoire
-bool hasWon(char player) {
-    for(int i = 0; i <9; i++) {
-        for(int j = 0; j < 9; j++) {
-            for(int k = 0; k < 9; k++) {
-                if(i != j && i != k && j != k) {
-                    if(square[i] == player && square[j] == player && square[k] == player) {
-                        if(magicSquare[i] + magicSquare[j] + magicSquare[k] == 15) {
+// Détection de victoire
+bool hasWon(char player)
+{
+    for (int i = 0; i < 9; i++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            for (int k = 0; k < 9; k++)
+            {
+                if (i != j && i != k && j != k)
+                {
+                    if (square[i] == player && square[j] == player && square[k] == player)
+                    {
+                        if (magicSquare[i] + magicSquare[j] + magicSquare[k] == 15)
+                        {
                             return true;
                         }
                     }
@@ -55,14 +115,17 @@ bool hasWon(char player) {
     return false;
 }
 
-//Affichage Victoire
-void printWinner() {
-    if(hasWon('X')) {
+// Affichage Victoire
+void printWinner()
+{
+    if (hasWon('X'))
+    {
         gameState = 1;
         printf("Le joueur 1 (X) gagne la partie !");
-    } else if(hasWon('O')) {
+    }
+    else if (hasWon('O'))
+    {
         gameState = 1;
         printf("Le joueur 2 (O) gagne la partie !");
     }
-    
 }
