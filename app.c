@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 char squarePattern[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -19,6 +21,13 @@ int scorePlayer2 = 0;
 
 // Choix dans le menu d'initialisation
 int choiceMenu;
+
+// Prototypes de fonctions
+int oneVersusOneGame(void);
+void board(void);
+int printWinner(void);
+
+
 
 int main()
 {
