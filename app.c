@@ -32,6 +32,7 @@ int main()
     // Print the menu
     printf("Welcome to the Tic Tac Toe game !\n");
     printf("1. Start a new game\n");
+    printf("2. Start a new game against computer\n");
     printf("0. Quit\n");
     printf("Please enter your choice: ");
 
@@ -116,32 +117,9 @@ int oneVersusOneGame()
 
         mark = (playerTurn == 1) ? 'X' : 'O';
 
-        if (choice == 1 && square[0] == '1')
-            square[0] = mark;
-
-        else if (choice == 2 && square[1] == '2')
-            square[1] = mark;
-
-        else if (choice == 3 && square[2] == '3')
-            square[2] = mark;
-
-        else if (choice == 4 && square[3] == '4')
-            square[3] = mark;
-
-        else if (choice == 5 && square[4] == '5')
-            square[4] = mark;
-
-        else if (choice == 6 && square[5] == '6')
-            square[5] = mark;
-
-        else if (choice == 7 && square[6] == '7')
-            square[6] = mark;
-
-        else if (choice == 8 && square[7] == '8')
-            square[7] = mark;
-
-        else if (choice == 9 && square[8] == '9')
-            square[8] = mark;
+        if(isPlayable(choice)) {
+            square[choice-1] = mark;
+        }
 
         else
         {
