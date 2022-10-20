@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <pthread.h>
 
 // Prototypes de fonctions
 int oneVersusOneGame(void);
