@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 
 // Prototypes de fonctions
 int oneVersusOneGame(void);
