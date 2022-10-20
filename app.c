@@ -2,9 +2,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
-#include <assert.h>
 
 int oneVersusComputerGame(void);
+bool isPlayable(int);
 int randomNumber(int, int);
 void *computerPlay(void);
 
@@ -179,38 +179,15 @@ int oneVersusComputerGame() {
             printf("Joueur %d, entrez un nombre: ", playerTurn);
             scanf("%d", &choice);
 
-        if (choice == 1 && square[0] == '1')
-            square[0] = mark;
+            if(isPlayable(choice)) {
+                square[choice-1] = mark;
+            }
 
-        else if (choice == 2 && square[1] == '2')
-            square[1] = mark;
-
-        else if (choice == 3 && square[2] == '3')
-            square[2] = mark;
-
-        else if (choice == 4 && square[3] == '4')
-            square[3] = mark;
-
-        else if (choice == 5 && square[4] == '5')
-            square[4] = mark;
-
-        else if (choice == 6 && square[5] == '6')
-            square[5] = mark;
-
-        else if (choice == 7 && square[6] == '7')
-            square[6] = mark;
-
-        else if (choice == 8 && square[7] == '8')
-            square[7] = mark;
-
-        else if (choice == 9 && square[8] == '9')
-            square[8] = mark;
-
-        else
-        {
-            printf("Case invalide");
-            playerTurn--;
-        }
+            else
+            {
+                printf("Case invalide");
+                playerTurn--;
+            }
              
         } else {
 
@@ -298,6 +275,38 @@ int printWinner()
     return -1;
 }
 
+bool isPlayable(int cellNumber) {
+
+    if (cellNumber == 1 && square[0] == '1')
+        return true;
+
+    else if (cellNumber == 2 && square[1] == '2')
+       return true;
+
+    else if (cellNumber == 3 && square[2] == '3')
+        return true;
+
+    else if (cellNumber == 4 && square[3] == '4')
+        return true;
+
+    else if (cellNumber == 5 && square[4] == '5')
+        return true;
+
+    else if (cellNumber == 6 && square[5] == '6')
+        return true;
+
+    else if (cellNumber == 7 && square[6] == '7')
+        return true;
+
+    else if (cellNumber == 8 && square[7] == '8')
+        return true;
+
+    else if (cellNumber == 9 && square[8] == '9')
+        return true;
+
+    return false;
+}
+
 int randomNumber(int min_num, int max_num) {
     int result = 0, low_num = 0, hi_num = 0;
 
@@ -320,7 +329,7 @@ void *computerPlay() {
 
     do {
         play = randomNumber(0, 8);
-    } while(false);
+    } while(!isPlayable(play+1));
 
     pthread_exit((void *) (play));
 }
