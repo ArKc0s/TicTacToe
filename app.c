@@ -13,6 +13,8 @@ int magicSquare[9] = {4, 9, 2, 3, 5, 7, 8, 1, 6};
 int gameState;
 // Joueur 1 = nombre impair | Joueur 2 = nombre pair
 int playerTurn;
+// Nombre de coups joués
+int movesPlayed;
 // Case sélectionnée
 int choice;
 // Scores
@@ -83,6 +85,7 @@ int oneVersusOneGame()
 {
     gameState = -1;
     playerTurn = 1;
+    movesPlayed = 0;
     memcpy(square, squarePattern, sizeof(squarePattern));
 
     do
@@ -126,9 +129,18 @@ int oneVersusOneGame()
         {
             printf("Case invalide");
             playerTurn--;
+            movesPlayed--;
         }
 
+        movesPlayed++;
+
         gameState = printWinner();
+
+        if (movesPlayed == 9 && gameState == -1){
+            printf("Egalitée !\n");
+            gameState = 0;
+        }
+
         playerTurn++;
 
     } while (gameState == -1);
