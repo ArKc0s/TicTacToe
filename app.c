@@ -1,12 +1,18 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 #include <time.h>
 
+// Prototypes de fonctions
+int oneVersusOneGame(void);
+void board(void);
+int printWinner(void);
 int oneVersusComputerGame(void);
 bool isPlayable(int);
 int randomNumber(int, int);
 void *computerPlay(void);
+
 
 char squarePattern[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -18,6 +24,8 @@ int magicSquare[9] = {4, 9, 2, 3, 5, 7, 8, 1, 6};
 int gameState;
 // Joueur 1 = nombre impair | Joueur 2 = nombre pair
 int playerTurn;
+// Nombre de coups joués
+int movesPlayed;
 // Case sélectionnée
 int choice;
 // Scores
@@ -26,6 +34,7 @@ int scorePlayer2 = 0;
 
 // Choix dans le menu d'initialisation
 int choiceMenu;
+
 
 int main()
 {
@@ -105,6 +114,7 @@ int oneVersusOneGame()
 {
     gameState = -1;
     playerTurn = 1;
+    movesPlayed = 0;
     memcpy(square, squarePattern, sizeof(squarePattern));
 
     do
@@ -125,9 +135,18 @@ int oneVersusOneGame()
         {
             printf("Case invalide");
             playerTurn--;
+            movesPlayed--;
         }
 
+        movesPlayed++;
         gameState = printWinner();
+        
+        if (movesPlayed == 9 && gameState == -1){
+            printf("Egalitée !\n");
+            gameState = 0;
+        }
+
+        
         playerTurn++;
 
     } while (gameState == -1);
@@ -142,6 +161,7 @@ int oneVersusComputerGame() {
     pthread_t computer;
     void *computerChoice = NULL;
 
+    movesPlayed = 0;
     gameState = -1;
     playerTurn = 1;
     memcpy(square, squarePattern, sizeof(squarePattern));
@@ -165,6 +185,7 @@ int oneVersusComputerGame() {
             {
                 printf("Case invalide");
                 playerTurn--;
+                movesPlayed--;
             }
              
         } else {
@@ -175,7 +196,15 @@ int oneVersusComputerGame() {
 
         }
 
+        movesPlayed++;
+
         gameState = printWinner();
+
+        if (movesPlayed == 9 && gameState == -1){
+            printf("Egalitée !\n");
+            gameState = 0;
+        }
+
         playerTurn++;
 
     } while (gameState == -1);
