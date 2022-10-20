@@ -1,5 +1,12 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+#include <time.h>
+#include <assert.h>
+
+int oneVersusComputerGame(void);
+int randomNumber(int, int);
+void *computerPlay(void);
 
 char squarePattern[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char square[9] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -55,6 +62,29 @@ int main()
 
         } while (choiceMenu == 1);
         // Start the game
+    }
+    else if(choiceMenu == 2) {
+
+        do
+        {
+            int game = oneVersusComputerGame();
+
+            if (game == 1)
+            {
+                scorePlayer1++;
+            }
+            else if (game == 2)
+            {
+                scorePlayer2++;
+            }
+            printf("Player 1 score: %d\n", scorePlayer1);
+            printf("Player 2 score: %d\n", scorePlayer2);
+
+            printf("Do you want to play again ? (1 = yes, 0 = no)\n");
+            scanf("%d", &choiceMenu);
+
+        } while (choiceMenu == 1);
+
     }
     else if (choiceMenu == 0)
     {
@@ -129,6 +159,78 @@ int oneVersusOneGame()
     return gameState;
 }
 
+int oneVersusComputerGame() {
+
+    pthread_t computer;
+    void *computerChoice = NULL;
+
+    gameState = -1;
+    playerTurn = 1;
+    memcpy(square, squarePattern, sizeof(squarePattern));
+
+     do
+    {
+        board();
+        playerTurn = (playerTurn % 2) ? 1 : 2;
+        mark = (playerTurn == 1) ? 'X' : 'O';
+
+        if(playerTurn == 1) {
+
+            printf("Joueur %d, entrez un nombre: ", playerTurn);
+            scanf("%d", &choice);
+
+        if (choice == 1 && square[0] == '1')
+            square[0] = mark;
+
+        else if (choice == 2 && square[1] == '2')
+            square[1] = mark;
+
+        else if (choice == 3 && square[2] == '3')
+            square[2] = mark;
+
+        else if (choice == 4 && square[3] == '4')
+            square[3] = mark;
+
+        else if (choice == 5 && square[4] == '5')
+            square[4] = mark;
+
+        else if (choice == 6 && square[5] == '6')
+            square[5] = mark;
+
+        else if (choice == 7 && square[6] == '7')
+            square[6] = mark;
+
+        else if (choice == 8 && square[7] == '8')
+            square[7] = mark;
+
+        else if (choice == 9 && square[8] == '9')
+            square[8] = mark;
+
+        else
+        {
+            printf("Case invalide");
+            playerTurn--;
+        }
+             
+        } else {
+
+            assert(pthread_create(&computer, NULL, computerPlay, NULL) == 0);
+            pthread_join(computer, &computerChoice);
+            square[(int) computerChoice] = mark;
+
+        }
+
+        gameState = printWinner();
+        playerTurn++;
+
+    } while (gameState == -1);
+
+    board();
+
+    return gameState;
+
+}
+
 // Affichage de la grille
 void board()
 {
@@ -195,3 +297,31 @@ int printWinner()
     }
     return -1;
 }
+
+int randomNumber(int min_num, int max_num) {
+    int result = 0, low_num = 0, hi_num = 0;
+
+    if (min_num < max_num) {
+        low_num = min_num;
+        hi_num = max_num + 1; // include max_num in output
+    } else {
+        low_num = max_num + 1; // include max_num in output
+        hi_num = min_num;
+    }
+
+    srand(time(NULL));
+    result = (rand() % (hi_num - low_num)) + low_num;
+    return result;
+}
+
+
+void *computerPlay() {
+    int play;
+
+    do {
+        play = randomNumber(0, 8);
+    } while(false);
+
+    pthread_exit((void *) (play));
+}
+
