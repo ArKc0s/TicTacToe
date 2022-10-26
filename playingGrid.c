@@ -8,6 +8,7 @@ typedef struct PlayingGrid
 {
     char grid[MAX_GRID_SIZE][2];
     int gridNumbers[MAX_GRID_SIZE];
+    int isWon;
 
 } PlayingGrid;
 
@@ -28,6 +29,8 @@ void PlayingGrid__init(PlayingGrid* self, int size) {
     }
 
     free(str);
+
+    self->isWon = -1;
 }
 
 PlayingGrid* PlayingGrid__create(int size) {
@@ -78,26 +81,24 @@ void displayGrid(PlayingGrid* self, int size) {
     }
 }
 
-int printWin(char player)
+void printWin(char player, PlayingGrid* self)
 {
     if (player == 'X')
     {
         //gameState = 1;
         printf("Le joueur 1 (X) gagne la partie !");
-        return 1;
+        self->isWon = 1;
     }
     else if (player == 'O')
     {
         //gameState = 1;
         printf("Le joueur 2 (O) gagne la partie !");
-        return 2;
+        self->isWon = 2;
     }
-    return -1;
 }
 
 void hasWon(int arr[], int data[], int start, int end,
-                     int index, int r, char player, char grid[][2], MagicSquare* ms)
-{
+                     int index, int r, char player, char grid[][2], MagicSquare* ms, PlayingGrid* self) {
     // Current combination is ready to be printed, print it
     if (index == r)
     {
@@ -119,7 +120,7 @@ void hasWon(int arr[], int data[], int start, int end,
             }
 
             if(sum == ms->sum) {
-                printWin(player);
+                printWin(player, self);
             }
         }
         return;
@@ -136,7 +137,14 @@ void hasWon(int arr[], int data[], int start, int end,
         if(grid[arr[i]][0] != player) {
             continue;
         }
-        hasWon(arr, data, i+1, end, index+1, r, player, grid, ms);
+        hasWon(arr, data, i+1, end, index+1, r, player, grid, ms, self);
     }
+}
+
+bool isPlayable(int cell, char grid[][2]) {
+    if(grid[cell][0] != 'X' || grid[cell][0] != 'O') {
+        return true;
+    }
+    return false;
 }
 

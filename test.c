@@ -1,6 +1,5 @@
 #include <stdbool.h>
-#include "magicSquare.c"
-#include "playingGrid.c"
+#include "game.c"
 
 int size;
 
@@ -8,7 +7,7 @@ int main() {
 
     size = 9;
 
-    MagicSquare* ms = MagicSquare__create(size);
+    /*MagicSquare* ms = MagicSquare__create(size);
     PlayingGrid* grid = PlayingGrid__create(size*size);
 
     printf("%d", ms->sum);
@@ -41,8 +40,9 @@ int main() {
    
     int test[size];
     hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'O', grid->grid, ms);
-    hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'X', grid->grid, ms);
+    hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'X', grid->grid, ms);*/
 
-   
+    Game* game = Game__create(1, 3);
+    startGame(game);
 
 }
