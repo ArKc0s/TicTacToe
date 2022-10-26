@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "magicSquare.c"
 #include "playingGrid.c"
 
@@ -23,12 +24,25 @@ int main() {
 
     for(int i = 0; i < 9; i++) {
       
-        printf("%d ", grid->grid[i]);
+        printf("%c ", grid->gridNumbers[i]);
 
     }
 
     printf("\n");
 
+    //displayGrid(grid, size);
+
+    for(int i = 0; i < size; i++) {
+        grid->grid[size*i][0] = 'O';
+        grid->grid[size*i][1] = '\0';
+    }
+
     displayGrid(grid, size);
+   
+    int test[size];
+    hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'O', grid->grid, ms);
+    hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'X', grid->grid, ms);
+
+   
 
 }
