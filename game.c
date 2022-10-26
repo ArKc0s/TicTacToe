@@ -65,8 +65,8 @@ int oneVersusOneGame(Game* self)
         self->movesCount++;
 
         int test[2];
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'O', self->pg->grid, self->ms, self->pg);
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'X', self->pg->grid, self->ms, self->pg);
+        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
+        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
 
         self->gameState = self->pg->isWon;
         

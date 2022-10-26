@@ -98,7 +98,8 @@ void printWin(char player, PlayingGrid* self)
 }
 
 void hasWon(int arr[], int data[], int start, int end,
-                     int index, int r, char player, char grid[][2], MagicSquare* ms, PlayingGrid* self) {
+                     int index, int r, char player, MagicSquare* ms, PlayingGrid* self) {
+    
     // Current combination is ready to be printed, print it
     if (index == r)
     {
@@ -108,7 +109,7 @@ void hasWon(int arr[], int data[], int start, int end,
 
             playerFound = true;
 
-            if(grid[data[j]][0] != player) {
+            if(self->grid[data[j]][0] != player) {
                 playerFound = false;
             } 
 
@@ -134,10 +135,10 @@ void hasWon(int arr[], int data[], int start, int end,
     {
         data[index] = arr[i];
         //On ne vérifie pas une combinaison si la première case vérifiée ne contient pas le joueur
-        if(grid[arr[i]][0] != player) {
+        if(self->grid[arr[i]][0] != player) {
             continue;
         }
-        hasWon(arr, data, i+1, end, index+1, r, player, grid, ms, self);
+        hasWon(arr, data, i+1, end, index+1, r, player, ms, self);
     }
 }
 
