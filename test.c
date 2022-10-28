@@ -42,7 +42,7 @@ int main() {
     hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'O', grid->grid, ms);
     hasWon(grid->gridNumbers, test, 0, (size*size)-1, 0, size, 'X', grid->grid, ms);*/
 
-    Game* game = Game__create(2, 3);
+    Game* game = Game__create(3, 3);
     startGame(game);
 
 
