@@ -142,8 +142,8 @@ void hasWon(int arr[], int data[], int start, int end,
     }
 }
 
-bool isPlayable(int cell, char grid[][2]) {
-    if(grid[cell][0] != 'X' || grid[cell][0] != 'O') {
+bool isPlayable(int cell, char grid[][2], int size) {
+    if(cell >= 0 && cell <= size-1 && grid[cell][0] != 'X' && grid[cell][0] != 'O') {
         return true;
     }
     return false;
