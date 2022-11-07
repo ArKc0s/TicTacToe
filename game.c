@@ -1,18 +1,15 @@
 #include "magicSquare.c"
 #include "playingGrid.c"
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <time.h>
 #include <sys/time.h>
 #include <assert.h>
 #include <pthread.h>
 
-typedef struct Game
-{
+typedef struct Game {
     int gameState;
     int playerTurn;
     int movesCount;
@@ -30,8 +27,8 @@ struct Data {
 };
 
 pthread_mutex_t mutex;
-    
-
+char mark;
+int choice;
 
 void Game__init(Game* self, int type, int size) {
 
@@ -51,33 +48,72 @@ Game* Game__create(int type, int gridSize) {
     return game;
 }
 
+void Game__reset(Game* self) {
+    PlayingGrid__reset(self->pg);
+    MagicSquare__reset(self->ms);
+}
+
+
+void Game__destroy(Game* game) {
+  if (game) {
+    PlayingGrid__destroy(game->pg);
+    MagicSquare__destroy(game->ms);
+    Game__reset(game);
+    free(game);
+  }
+}
+
+long long current_timestamp() {
+    struct timeval te; 
+    gettimeofday(&te, NULL);
+    long long milliseconds = te.tv_sec*1000LL + te.tv_usec/100;
+    return milliseconds;
+}
+
+
+void randomPlay(PlayingGrid* pg, int size, char mark) {
+      
+    do {
+        choice = rand() % (size*size + 1);
+    } while(!isPlayable(choice - 1, pg->grid, size*size));
+
+    pg->grid[choice-1][0] = mark;
+    pg->grid[choice-1][1] = ' ';
+}
+
 void *critique(void *data) {
 
     struct Data *d  = data;
-    int choice;
 
     pthread_mutex_lock(&mutex);
-
-    srand(time(NULL));
-
-    do { 
-        choice = rand() % (d->size*d->size +1);
-        printf("%d ", choice);
-    } while(!isPlayable(choice-1, d->pg->grid, d->size*d->size));
-
-    d->pg->grid[choice-1][0] = d->mark;
-    d->pg->grid[choice-1][1] = ' ';
-    
-    sleep(1);
+    srand(current_timestamp());
+    randomPlay(d->pg, d->size, d->mark);
     pthread_mutex_unlock(&mutex);
+
     return NULL;
+}
+
+void detectWin(Game* self, int buffer[]) {
+    
+        hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
+        hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
+
+        self->gameState = self->pg->isWon;
+
+        if (self->movesCount == self->size*self->size && self->gameState == -1){
+            printf("Egalitée !\n");
+            self->gameState = 0;
+        }
+
+        self->playerTurn++;
+
+        printf("\n");
 }
 
 int oneVersusOneGame(Game* self)
 {
 
     int choice;
-    char mark;
     
     do
     {
@@ -104,18 +140,8 @@ int oneVersusOneGame(Game* self)
 
         self->movesCount++;
 
-        int test[2];
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
-
-        self->gameState = self->pg->isWon;
-        
-        if (self->movesCount == self->size*self->size && self->gameState == -1){
-            printf("Egalitée !\n");
-            self->gameState = 0;
-        }
-      
-        self->playerTurn++;
+        int buffer[2];
+        detectWin(self, buffer);
 
     } while (self->gameState == -1);
 
@@ -127,9 +153,6 @@ int oneVersusOneGame(Game* self)
 int oneVersusComputerGame(Game* self) {
 
     int choice;
-    char mark;
-
-    srand(time(0));
 
     do {
         displayGrid(self->pg, self->size);
@@ -144,42 +167,19 @@ int oneVersusComputerGame(Game* self) {
             if(isPlayable(choice-1, self->pg->grid, self->size*self->size)) {
                 self->pg->grid[choice-1][0] = mark;
                 self->pg->grid[choice-1][1] = ' ';
-            }
-
-            else
-            {
+            } else {
                 printf("Case invalide");
                 self->playerTurn--;
                 self->movesCount--;
-            }
-             
+            }             
         } else {
-
-            
-            do {
-                choice = rand() % (self->size*self->size + 1);
-                printf("%d ", choice);
-            } while(!isPlayable(choice - 1, self->pg->grid, self->size*self->size));
-
-            self->pg->grid[choice-1][0] = mark;
-            self->pg->grid[choice-1][1] = ' ';
-
+            randomPlay(self->pg, self->size, mark);
         }
 
         self->movesCount++;
 
-        int test[2];
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
-
-        self->gameState = self->pg->isWon;
-
-        if (self->movesCount == self->size*self->size && self->gameState == -1){
-            printf("Egalitée !\n");
-            self->gameState = 0;
-        }
-
-        self->playerTurn++;
+        int buffer[2];
+        detectWin(self, buffer);
 
     } while (self->gameState == -1);
 
@@ -191,16 +191,11 @@ int oneVersusComputerGame(Game* self) {
 
 int computerVersusComputerGame(Game* self) {
 
-    int choice;
-    char mark;
-
     pthread_t j1, j2;
     struct Data d1, d2;
 
     pthread_mutex_init(&mutex, NULL);
-
     do {
-        displayGrid(self->pg, self->size);
         self->playerTurn = (self->playerTurn % 2) ? 1 : 2;
 
 
@@ -217,6 +212,7 @@ int computerVersusComputerGame(Game* self) {
             d2.pg = self->pg;
             d2.size = self->size;
             d2.mark = 'O';
+
             pthread_create(&j2, NULL, critique, (void *) &d2);
             pthread_join(j2, NULL);
 
@@ -224,23 +220,12 @@ int computerVersusComputerGame(Game* self) {
 
         self->movesCount++;
 
-        int test[2];
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
-        hasWon(self->pg->gridNumbers, test, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
-
-        self->gameState = self->pg->isWon;
-
-        if (self->movesCount == self->size*self->size && self->gameState == -1){
-            printf("Egalitée !\n");
-            self->gameState = 0;
-        }
-
-        self->playerTurn++;
+        int buffer[2];
+        detectWin(self, buffer);
 
     } while (self->gameState == -1);
 
     displayGrid(self->pg, self->size);
-
     pthread_mutex_destroy(&mutex);
 
     return self->gameState;
@@ -259,17 +244,3 @@ int startGame(Game* self) {
     }
 
 }
-
-
-
-
-
-/*void *computerPlay() {
-    int play;
-
-    do {
-        play = randomNumber(0, 8);
-    } while(!isPlayable(play+1));
-
-    pthread_exit((void *) (play));
-}*/

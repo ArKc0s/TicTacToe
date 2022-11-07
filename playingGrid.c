@@ -39,9 +39,20 @@ PlayingGrid* PlayingGrid__create(int size) {
     return pGrid;
 }
 
+void PlayingGrid__reset(PlayingGrid* self) {
+}
+
+
+void PlayingGrid__destroy(PlayingGrid* pg) {
+  if (pg) {
+     PlayingGrid__reset(pg);
+     free(pg);
+  }
+}
+
 void displayGrid(PlayingGrid* self, int size) {
 
-    system("clear");
+    //system("clear");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
@@ -86,13 +97,13 @@ void printWin(char player, PlayingGrid* self)
     if (player == 'X')
     {
         //gameState = 1;
-        printf("Le joueur 1 (X) gagne la partie !");
+        //printf("Le joueur 1 (X) gagne la partie !");
         self->isWon = 1;
     }
     else if (player == 'O')
     {
         //gameState = 1;
-        printf("Le joueur 2 (O) gagne la partie !");
+        //printf("Le joueur 2 (O) gagne la partie !");
         self->isWon = 2;
     }
 }
@@ -111,16 +122,19 @@ void hasWon(int arr[], int data[], int start, int end,
 
             if(self->grid[data[j]][0] != player) {
                 playerFound = false;
-            } 
-
+            }
+            printf("%d", data[j]);
         }
+
+        printf(" ");
 
         if(playerFound) {
             for(int j = 0; j<r; j++) {
                 sum+=ms->magicSquare[data[j]];
+    
             }
-
             if(sum == ms->sum) {
+                printf("\n%d : %d\n", sum, ms->sum);
                 printWin(player, self);
             }
         }
@@ -137,8 +151,10 @@ void hasWon(int arr[], int data[], int start, int end,
         //On ne vérifie pas une combinaison si la première case vérifiée ne contient pas le joueur
         if(self->grid[arr[i]][0] != player) {
             continue;
+        } else if(self->grid[arr[i]+1][0] == player || self->grid[arr[i]-1][0] == player || self->grid[arr[i]+r+1][0] == player || self->grid[arr[i]+r-1][0] == player) {
+            hasWon(arr, data, i+1, end, index+1, r, player, ms, self);
         }
-        hasWon(arr, data, i+1, end, index+1, r, player, ms, self);
+        //hasWon(arr, data, i+1, end, index+1, r, player, ms, self);
     }
 }
 

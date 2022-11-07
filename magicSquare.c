@@ -53,7 +53,15 @@ void MagicSquare__init(MagicSquare* self, int n) {
         i--; // 1st condition
     }
 
-    memcpy(self->magicSquare, magicSquare, sizeof(self->magicSquare));
+    //memcpy(self->magicSquare, magicSquare, sizeof(self->magicSquare));
+    int k = 0;
+
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            self->magicSquare[k] = magicSquare[j][i];
+            k++;
+        }
+    }
     self->sum = (n * (n * n + 1) / 2);
 
 }
@@ -62,6 +70,26 @@ MagicSquare* MagicSquare__create(int size) {
     MagicSquare* square = (MagicSquare*) malloc(sizeof(MagicSquare));
     MagicSquare__init(square, size);
     return square;
+}
+
+void MagicSquare__reset(MagicSquare* self) {
+}
+
+
+void MagicSquare__destroy(MagicSquare* ms) {
+  if (ms) {
+     MagicSquare__reset(ms);
+     free(ms);
+  }
+}
+
+void printms(MagicSquare* self) {
+    for (int i = 0; i < 25; i++)
+    {
+        printf("%d ", self->magicSquare[i]);
+        
+    }
+    
 }
 
 
