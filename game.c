@@ -14,7 +14,6 @@ typedef struct Game {
     int movesCount;
     int gameType;
     int size;
-    MagicSquare* ms;
     PlayingGrid* pg;
 
 } Game;
@@ -35,7 +34,7 @@ void Game__init(Game* self, int type, int size) {
     self->playerTurn = 1;
     self->movesCount = 0;
     self->gameType = type;
-    self->ms = MagicSquare__create(size);
+    self->pg = PlayingGrid__create(size*size)
     self->size = size;
 
 }
@@ -217,7 +216,6 @@ int computerVersusComputerGame(Game* self) {
     return self->gameState;
 
 }
-
 
 int startGame(Game* self) {
 
