@@ -1,4 +1,4 @@
-#include<stdio.h>
+#include <stdio.h>
 #include <stdbool.h>
 
 #define MAX_GRID_SIZE 81
@@ -92,70 +92,98 @@ void displayGrid(PlayingGrid* self, int size) {
     }
 }
 
-void printWin(char player, PlayingGrid* self)
-{
-    if (player == 'X')
-    {
-        //gameState = 1;
-        //printf("Le joueur 1 (X) gagne la partie !");
-        self->isWon = 1;
+int numInRow = 0;
+int prevVal = 0;
+
+int countNumInRow(PlayingGrid* self, int size,int winCondition, int index) {
+
+    int curVal = (self->grid[index][0] == 'X') ? 1 : (self->grid[index][0] == 'O') ? 2 : 0;
+    if(curVal != prevVal || curVal == 0) {
+        prevVal = curVal;
+        numInRow = 1;
+    } else {
+        numInRow++;
+        if(numInRow >= winCondition) {
+            return curVal;
+        }
     }
-    else if (player == 'O')
-    {
-        //gameState = 1;
-        //printf("Le joueur 2 (O) gagne la partie !");
-        self->isWon = 2;
-    }
+
+    return -1;
 }
 
-void hasWon(int arr[], int data[], int start, int end,
-                     int index, int r, char player, MagicSquare* ms, PlayingGrid* self) {
-    
-    // Current combination is ready to be printed, print it
-    if (index == r)
-    {
-        int sum = 0;
-        bool playerFound;
-        for (int j=0; j<r; j++) {
+int winDetect(PlayingGrid* self, int size, int winCondition) {
 
-            playerFound = true;
+    int result;
 
-            if(self->grid[data[j]][0] != player) {
-                playerFound = false;
-            }
-            printf("%d", data[j]);
-        }
-
-        printf(" ");
-
-        if(playerFound) {
-            for(int j = 0; j<r; j++) {
-                sum+=ms->magicSquare[data[j]];
-    
-            }
-            if(sum == ms->sum) {
-                printf("\n%d : %d\n", sum, ms->sum);
-                printWin(player, self);
+    //colonnes
+    for(int x = 0; x < size; x++) {
+       prevVal=0;
+        for(int y = 0; y < size; y++) {
+            result = countNumInRow(self, size, winCondition, x+(size*y));
+            if(result != -1) {
+                return result;
             }
         }
-        return;
     }
- 
-    // replace index with all possible elements. The condition
-    // "end-i+1 >= r-index" makes sure that including one element
-    // at index will make a combination with remaining elements
-    // at remaining positions
-    for (int i=start; i<=end && end-i+1 >= r-index; i++)
-    {
-        data[index] = arr[i];
-        //On ne vérifie pas une combinaison si la première case vérifiée ne contient pas le joueur
-        if(self->grid[arr[i]][0] != player) {
-            continue;
-        } else if(self->grid[arr[i]+1][0] == player || self->grid[arr[i]-1][0] == player || self->grid[arr[i]+r+1][0] == player || self->grid[arr[i]+r-1][0] == player) {
-            hasWon(arr, data, i+1, end, index+1, r, player, ms, self);
+
+    //lignes
+    for(int y = 0; y < size; y++) {
+        prevVal = 0;
+        for(int x = 0; x < size; x++) {
+            result = countNumInRow(self, size, winCondition, x+(size*y));
+            if(result != -1) {
+                return result;
+            }
         }
-        //hasWon(arr, data, i+1, end, index+1, r, player, ms, self);
     }
+
+    //diag sup droite
+    for(int x=0; x < size; x++) {
+        prevVal = 0;
+        for(int i=x; i < (size*size) - (x*size) ; i+=size+1) {
+            result = countNumInRow(self, size, winCondition, i);
+            if(result != -1) {
+                return result;
+            }
+        }
+    }
+
+    //diag inf droite
+    for(int y=1; y < size; y++) {
+        prevVal = 0;
+        for(int i=y*size; i < (size*size) - y ; i+=size+1) {
+            result = countNumInRow(self, size, winCondition, i);
+            if(result != -1) {
+                return result;
+            }
+        }
+    }
+
+    //diag sup gauche
+    for(int x=0; x < size; x++) {
+        prevVal = 0;
+
+        for(int i=x; i < x*size+1 ; i+=size-1) {
+            result = countNumInRow(self, size, winCondition, i);
+            if(result != -1) {
+                return result;
+            }
+        }
+    }
+
+    //diag inf gauche
+    for(int y=1; y < size; y++) {
+        prevVal = 0;
+        for(int i=(y+1)*(size)-1; i < size*size ; i+=size-1) {
+            result = countNumInRow(self, size, winCondition, i);
+            if(result != -1) {
+                return result;
+            }
+        }
+    }
+
+    return -1;
+
 }
 
 bool isPlayable(int cell, char grid[][2], int size) {
