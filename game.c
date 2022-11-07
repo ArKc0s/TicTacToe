@@ -1,4 +1,3 @@
-#include "magicSquare.c"
 #include "playingGrid.c"
 #include <stdio.h>
 #include <stdbool.h>
@@ -37,7 +36,6 @@ void Game__init(Game* self, int type, int size) {
     self->movesCount = 0;
     self->gameType = type;
     self->ms = MagicSquare__create(size);
-    self->pg = PlayingGrid__create(size*size);
     self->size = size;
 
 }
@@ -50,14 +48,12 @@ Game* Game__create(int type, int gridSize) {
 
 void Game__reset(Game* self) {
     PlayingGrid__reset(self->pg);
-    MagicSquare__reset(self->ms);
 }
 
 
 void Game__destroy(Game* game) {
   if (game) {
     PlayingGrid__destroy(game->pg);
-    MagicSquare__destroy(game->ms);
     Game__reset(game);
     free(game);
   }
