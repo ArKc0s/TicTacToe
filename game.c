@@ -70,6 +70,19 @@ long long current_timestamp() {
     return milliseconds;
 }
 
+void play(Game* self, char mark, int position) {
+
+    if(isPlayable(position-1, self->pg->grid, self->size*self->size)) {
+        self->pg->grid[position-1][0] = mark;
+        self->pg->grid[position-1][1] = ' ';
+    } else {
+        printf("Case invalide");
+        self->playerTurn--;
+        self->movesCount--;
+    }
+
+    self->movesCount++;
+}
 
 void randomPlay(PlayingGrid* pg, int size, char mark) {
       
@@ -95,28 +108,27 @@ void *critique(void *data) {
 
 void detectWin(Game* self, int buffer[]) {
     
-        hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
+        /*hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
         hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
 
-        self->gameState = self->pg->isWon;
+        self->gameState = self->pg->isWon;*/
+
+        self->gameState = winDetect(self->pg, self->size, 3);
 
         if (self->movesCount == self->size*self->size && self->gameState == -1){
-            printf("Egalitée !\n");
+            if(self->gameType != 3) {
+                printf("Egalité !\n");
+            }
             self->gameState = 0;
         }
 
         self->playerTurn++;
 
-        printf("\n");
 }
 
-int oneVersusOneGame(Game* self)
-{
+int oneVersusOneGame(Game* self) {
 
-    int choice;
-    
-    do
-    {
+    do {
         displayGrid(self->pg, self->size);
         self->playerTurn = (self->playerTurn % 2) ? 1 : 2;    
 
@@ -125,20 +137,7 @@ int oneVersusOneGame(Game* self)
         scanf("%d", &choice);
 
         mark = (self->playerTurn == 1) ? 'X' : 'O';
-
-        if(isPlayable(choice-1, self->pg->grid, self->size*self->size)) {
-            self->pg->grid[choice-1][0] = mark;
-            self->pg->grid[choice-1][1] = ' ';
-        }
-
-        else
-        {
-            printf("Case invalide");
-            self->playerTurn--;
-            self->movesCount--;
-        }
-
-        self->movesCount++;
+        play(self, mark, choice);
 
         int buffer[2];
         detectWin(self, buffer);
@@ -152,8 +151,6 @@ int oneVersusOneGame(Game* self)
 
 int oneVersusComputerGame(Game* self) {
 
-    int choice;
-
     do {
         displayGrid(self->pg, self->size);
         self->playerTurn = (self->playerTurn % 2) ? 1 : 2;
@@ -164,19 +161,12 @@ int oneVersusComputerGame(Game* self) {
             printf("Joueur %d, entrez un nombre: ", self->playerTurn);
             scanf("%d", &choice);
 
-            if(isPlayable(choice-1, self->pg->grid, self->size*self->size)) {
-                self->pg->grid[choice-1][0] = mark;
-                self->pg->grid[choice-1][1] = ' ';
-            } else {
-                printf("Case invalide");
-                self->playerTurn--;
-                self->movesCount--;
-            }             
+            play(self, mark, choice);    
+
         } else {
             randomPlay(self->pg, self->size, mark);
+            self->movesCount++;
         }
-
-        self->movesCount++;
 
         int buffer[2];
         detectWin(self, buffer);
