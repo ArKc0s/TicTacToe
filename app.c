@@ -37,7 +37,7 @@ int scorePlayer2 = 0;
 // Choix dans le menu d'initialisation
 int choiceMenu;
 
-
+// Fonction de jeu principale
 int main()
 {
     // Print the menu
@@ -112,6 +112,7 @@ int main()
 
 }
 
+// Fonction de jeu Joueur 1 vs Joueur 2
 int oneVersusOneGame()
 {
     gameState = -1;
@@ -158,6 +159,7 @@ int oneVersusOneGame()
     return gameState;
 }
 
+// Fonction de jeu Joueur 1 vs Ordinateur
 int oneVersusComputerGame() {
 
     pthread_t computer;
@@ -284,6 +286,7 @@ int printWinner()
     return -1;
 }
 
+// Vérification de la validité du choix
 bool isPlayable(int cellNumber) {
 
     if (cellNumber == 1 && square[0] == '1')
@@ -316,6 +319,7 @@ bool isPlayable(int cellNumber) {
     return false;
 }
 
+// Génération de nombre aléatoire
 int randomNumber(int min_num, int max_num) {
     int result = 0, low_num = 0, hi_num = 0;
 
@@ -332,7 +336,7 @@ int randomNumber(int min_num, int max_num) {
     return result;
 }
 
-
+// Fonction de jeu Ordinateur vs Ordinateur
 void *computerPlay() {
     int play;
 
