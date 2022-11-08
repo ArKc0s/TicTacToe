@@ -39,6 +39,7 @@ pthread_mutex_t mutex;
 char mark;
 int choice;
 
+// Function to initialise the game variables
 void Game__init(Game* self, int type, int size, int winCondition, int fisrtPlayer, bool isLogged) {
 
     self->gameState = -1;
@@ -69,6 +70,7 @@ void Game__init(Game* self, int type, int size, int winCondition, int fisrtPlaye
     
 }
 
+// Function to create a new game, allocating memory for it, and returning a pointer to it
 Game* Game__create(int type, int gridSize, int winCondition, int firstPlayer, bool isLogged) {
     Game* game = (Game*) malloc(sizeof(Game));
     Game__init(game, type, gridSize, winCondition, firstPlayer, isLogged);
@@ -76,10 +78,12 @@ Game* Game__create(int type, int gridSize, int winCondition, int firstPlayer, bo
     return game;
 }
 
+// Function to reset the game variables
 void Game__reset(Game* self) {
     PlayingGrid__reset(self->pg);
 }
 
+// Function to destroy the game, freeing the memory allocated for it
 void Game__destroy(Game* game) {
   if (game) {
     fclose(game->gameFile);
@@ -89,6 +93,7 @@ void Game__destroy(Game* game) {
   }
 }
 
+// Function to play a move, checking if the move is valid
 void play(Game* self, char mark, int position) {
 
     if(isPlayable(position-1, self->pg->grid, self->size*self->size)) {
@@ -103,6 +108,7 @@ void play(Game* self, char mark, int position) {
     self->movesCount++;
 }
 
+// Function a random move, used by the computer
 void randomPlay(PlayingGrid* pg, int size, char mark, FILE* gameFile, bool isLogged) {
       
     do {
@@ -115,6 +121,7 @@ void randomPlay(PlayingGrid* pg, int size, char mark, FILE* gameFile, bool isLog
     if(isLogged) fprintf(gameFile, "- %c placed in position %d\n", mark, choice);
 }
 
+// Function to lock access to datas during the thread execution
 void *critique(void *data) {
 
     struct Data *d  = data;
@@ -127,6 +134,7 @@ void *critique(void *data) {
     return NULL;
 }
 
+// Function to detect the end of the game
 void processState(Game* self) {
 
     self->gameState = detectWin(self->pg, self->size, self->winCondition);
@@ -138,6 +146,7 @@ void processState(Game* self) {
 
 }
 
+// Function to present the result of the game
 void printGameResult(Game* self) {
 
     if(self->gameState == 1) {
@@ -150,6 +159,7 @@ void printGameResult(Game* self) {
 
 }
 
+// Function to add logs in the game file
 void logGameResult(Game* self) {
     fprintf(self->gameFile, "----- ENDGAME -----\n\n");
     fprintf(self->gameFile, "----- RESULTS -----\n");
@@ -161,6 +171,7 @@ void logGameResult(Game* self) {
     fprintf(self->gameFile, "---- ENDRESULTS ---\n");
 }
 
+// Function to play a game with a human player
 int oneVersusOneGame(Game* self) {
 
     do {
@@ -182,6 +193,7 @@ int oneVersusOneGame(Game* self) {
     return self->gameState;
 }
 
+// Function to play a game with a computer player
 int oneVersusComputerGame(Game* self) {
 
     do {
@@ -211,6 +223,7 @@ int oneVersusComputerGame(Game* self) {
 
 }
 
+// Function to watch a game with two computer players
 int computerVersusComputerGame(Game* self, bool print) {
 
     pthread_t j1, j2;
@@ -263,6 +276,7 @@ int computerVersusComputerGame(Game* self, bool print) {
 
 }
 
+// Function to start the choosen game mode
 int startGame(Game* self) {
 
     if(self->isLogged) fprintf(self->gameFile, "------ GAME -------\n");
