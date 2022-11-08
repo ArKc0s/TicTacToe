@@ -13,6 +13,7 @@ typedef struct PlayingGrid
 
 } PlayingGrid;
 
+// Function to initialise the playing grid
 void PlayingGrid__init(PlayingGrid* self, int size) {
 
     int length = snprintf( NULL, 0, "%d", size);
@@ -34,16 +35,18 @@ void PlayingGrid__init(PlayingGrid* self, int size) {
     self->isWon = -1;
 }
 
+// Function create the playing grid object allocating memory
 PlayingGrid* PlayingGrid__create(int size) {
     PlayingGrid* pGrid = (PlayingGrid*) malloc(sizeof(PlayingGrid));
     PlayingGrid__init(pGrid, size);
     return pGrid;
 }
 
+// Function to reset the playing grid
 void PlayingGrid__reset(PlayingGrid* self) {
 }
 
-
+// Function to destroy the playing grid object freeing memory
 void PlayingGrid__destroy(PlayingGrid* pg) {
   if (pg) {
      PlayingGrid__reset(pg);
@@ -51,6 +54,7 @@ void PlayingGrid__destroy(PlayingGrid* pg) {
   }
 }
 
+// Function to display the playing grid, printing the grid to the console
 void displayGrid(PlayingGrid* self, int size) {
 
     system("cls");
@@ -96,6 +100,7 @@ void displayGrid(PlayingGrid* self, int size) {
 int numInRow = 0;
 int prevVal = 0;
 
+// Function to count the number of consecutive numbers in a row
 int countNumInRow(PlayingGrid* self, int size, int winCondition, int index) {
 
     int curVal = (self->grid[index][0] == 'X') ? 1 : (self->grid[index][0] == 'O') ? 2 : 0;
@@ -112,6 +117,7 @@ int countNumInRow(PlayingGrid* self, int size, int winCondition, int index) {
     return -1;
 }
 
+// Function to check if the game has been won
 int detectWin(PlayingGrid* self, int size, int winCondition) {
 
     int result;
@@ -187,6 +193,7 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
 
 }
 
+// Function to check if the box is already taken
 bool isPlayable(int cell, char grid[][2], int size) {
     if(cell >= 0 && cell <= size-1 && grid[cell][0] != 'X' && grid[cell][0] != 'O') {
         return true;
