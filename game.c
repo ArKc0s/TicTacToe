@@ -49,7 +49,6 @@ void Game__reset(Game* self) {
     PlayingGrid__reset(self->pg);
 }
 
-
 void Game__destroy(Game* game) {
   if (game) {
     PlayingGrid__destroy(game->pg);
@@ -101,14 +100,9 @@ void *critique(void *data) {
     return NULL;
 }
 
-void detectWin(Game* self, int buffer[]) {
-    
-        /*hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'O', self->ms, self->pg);
-        hasWon(self->pg->gridNumbers, buffer, 0, (self->size*self->size)-1, 0, self->size, 'X', self->ms, self->pg);
+void processState(Game* self) {
 
-        self->gameState = self->pg->isWon;*/
-
-        self->gameState = winDetect(self->pg, self->size, 3);
+        self->gameState = detectWin(self->pg, self->size, 3);
 
         if (self->movesCount == self->size*self->size && self->gameState == -1){
             if(self->gameType != 3) {
@@ -133,9 +127,7 @@ int oneVersusOneGame(Game* self) {
 
         mark = (self->playerTurn == 1) ? 'X' : 'O';
         play(self, mark, choice);
-
-        int buffer[2];
-        detectWin(self, buffer);
+        processState(self);
 
     } while (self->gameState == -1);
 
@@ -163,8 +155,7 @@ int oneVersusComputerGame(Game* self) {
             self->movesCount++;
         }
 
-        int buffer[2];
-        detectWin(self, buffer);
+        processState(self);
 
     } while (self->gameState == -1);
 
@@ -197,16 +188,13 @@ int computerVersusComputerGame(Game* self) {
             d2.pg = self->pg;
             d2.size = self->size;
             d2.mark = 'O';
-
             pthread_create(&j2, NULL, critique, (void *) &d2);
             pthread_join(j2, NULL);
 
         }
 
         self->movesCount++;
-
-        int buffer[2];
-        detectWin(self, buffer);
+        processState(self);
 
     } while (self->gameState == -1);
 

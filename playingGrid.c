@@ -111,7 +111,7 @@ int countNumInRow(PlayingGrid* self, int size,int winCondition, int index) {
     return -1;
 }
 
-int winDetect(PlayingGrid* self, int size, int winCondition) {
+int detectWin(PlayingGrid* self, int size, int winCondition) {
 
     int result;
 
