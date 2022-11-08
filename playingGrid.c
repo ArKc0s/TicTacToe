@@ -52,7 +52,7 @@ void PlayingGrid__destroy(PlayingGrid* pg) {
 
 void displayGrid(PlayingGrid* self, int size) {
 
-    //system("clear");
+    system("clear");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
@@ -95,7 +95,7 @@ void displayGrid(PlayingGrid* self, int size) {
 int numInRow = 0;
 int prevVal = 0;
 
-int countNumInRow(PlayingGrid* self, int size,int winCondition, int index) {
+int countNumInRow(PlayingGrid* self, int size, int winCondition, int index) {
 
     int curVal = (self->grid[index][0] == 'X') ? 1 : (self->grid[index][0] == 'O') ? 2 : 0;
     if(curVal != prevVal || curVal == 0) {

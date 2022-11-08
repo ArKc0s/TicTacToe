@@ -14,6 +14,7 @@ typedef struct Game {
     int movesCount;
     int gameType;
     int size;
+    int winCondition;
     PlayingGrid* pg;
 
 } Game;
@@ -28,7 +29,7 @@ pthread_mutex_t mutex;
 char mark;
 int choice;
 
-void Game__init(Game* self, int type, int size) {
+void Game__init(Game* self, int type, int size, int winCondition) {
 
     self->gameState = -1;
     self->playerTurn = 1;
@@ -36,12 +37,12 @@ void Game__init(Game* self, int type, int size) {
     self->gameType = type;
     self->pg = PlayingGrid__create(size*size);
     self->size = size;
-
+    self->winCondition = winCondition;
 }
 
-Game* Game__create(int type, int gridSize) {
+Game* Game__create(int type, int gridSize, int winCondition) {
     Game* game = (Game*) malloc(sizeof(Game));
-    Game__init(game, type, gridSize);
+    Game__init(game, type, gridSize, winCondition);
     return game;
 }
 
@@ -105,7 +106,7 @@ void processState(Game* self) {
     if (self->movesCount == self->size*self->size && self->gameState == -1) {
         self->gameState = 0;
     } else {
-        self->gameState = detectWin(self->pg, self->size, 3);
+        self->gameState = detectWin(self->pg, self->size, self->winCondition);
     }
     self->playerTurn++;
 }
@@ -139,7 +140,7 @@ int oneVersusOneGame(Game* self) {
     } while (self->gameState == -1);
 
     displayGrid(self->pg, self->size);
-
+    printGameResult(self);
     return self->gameState;
 }
 
@@ -167,18 +168,21 @@ int oneVersusComputerGame(Game* self) {
     } while (self->gameState == -1);
 
     displayGrid(self->pg, self->size);
-
+    printGameResult(self);
     return self->gameState;
 
 }
 
-int computerVersusComputerGame(Game* self) {
+int computerVersusComputerGame(Game* self, bool print) {
 
     pthread_t j1, j2;
     struct Data d1, d2;
 
     pthread_mutex_init(&mutex, NULL);
     do {
+        if(print) {
+            displayGrid(self->pg, self->size);
+        }
         self->playerTurn = (self->playerTurn % 2) ? 1 : 2;
 
 
@@ -205,8 +209,11 @@ int computerVersusComputerGame(Game* self) {
 
     } while (self->gameState == -1);
 
-    displayGrid(self->pg, self->size);
-    printGameResult(self);
+    if(print) {
+        displayGrid(self->pg, self->size);
+        printGameResult(self);
+    }
+
     pthread_mutex_destroy(&mutex);
 
     return self->gameState;
@@ -220,7 +227,9 @@ int startGame(Game* self) {
     } else if(self->gameType == 2) {
         return oneVersusComputerGame(self);
     } else if(self->gameType == 3) {
-        return computerVersusComputerGame(self);
+        return computerVersusComputerGame(self, true);
+    } else if(self->gameType == 4) {
+        return computerVersusComputerGame(self, false);
     }
     return -1;
 }

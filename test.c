@@ -7,26 +7,14 @@ int result;
 
 int main() {
 
-    /*MagicSquare* ms = MagicSquare__create(5);
-    printms(ms);*/
-
     for(int i = 0; i < 50; i++) {
 
-        Game* game = Game__create(3, 3);
+        Game* game = Game__create(4, 9, 4);
         result = startGame(game);
         printf("%d ", result);
         Game__destroy(game);
     
     }
-
-    /*PlayingGrid* pg = PlayingGrid__create(5);
-    winDetect(pg, 5, 4);*/
-
-    /*Game* game = Game__create(3,3);
-    startGame(game);*/
-
-    
-   
 
 
 }
