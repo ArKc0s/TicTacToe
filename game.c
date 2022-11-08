@@ -1,5 +1,3 @@
-//TODO: Avoir la possibilité de print ou non vers un fichier
-
 #include "playingGrid.c"
 #include <stdio.h>
 #include <stdbool.h>
@@ -7,7 +5,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <assert.h>
 #include <pthread.h>
 
 long long current_timestamp() {
@@ -42,10 +39,10 @@ pthread_mutex_t mutex;
 char mark;
 int choice;
 
-void Game__init(Game* self, int type, int size, int winCondition, bool isLogged) { //TODO: Possibilité de choisir le premier joueur
+void Game__init(Game* self, int type, int size, int winCondition, int fisrtPlayer, bool isLogged) {
 
     self->gameState = -1;
-    self->playerTurn = 1;
+    self->playerTurn = fisrtPlayer;
     self->movesCount = 0;
     self->gameType = type;
     self->pg = PlayingGrid__create(size*size);
@@ -72,9 +69,9 @@ void Game__init(Game* self, int type, int size, int winCondition, bool isLogged)
     
 }
 
-Game* Game__create(int type, int gridSize, int winCondition, bool isLogged) {
+Game* Game__create(int type, int gridSize, int winCondition, int firstPlayer, bool isLogged) {
     Game* game = (Game*) malloc(sizeof(Game));
-    Game__init(game, type, gridSize, winCondition, isLogged);
+    Game__init(game, type, gridSize, winCondition, firstPlayer, isLogged);
 
     return game;
 }
