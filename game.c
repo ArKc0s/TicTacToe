@@ -34,7 +34,7 @@ void Game__init(Game* self, int type, int size) {
     self->playerTurn = 1;
     self->movesCount = 0;
     self->gameType = type;
-    self->pg = PlayingGrid__create(size*size)
+    self->pg = PlayingGrid__create(size*size);
     self->size = size;
 
 }
@@ -102,16 +102,23 @@ void *critique(void *data) {
 
 void processState(Game* self) {
 
+    if (self->movesCount == self->size*self->size && self->gameState == -1) {
+        self->gameState = 0;
+    } else {
         self->gameState = detectWin(self->pg, self->size, 3);
+    }
+    self->playerTurn++;
+}
 
-        if (self->movesCount == self->size*self->size && self->gameState == -1){
-            if(self->gameType != 3) {
-                printf("Egalité !\n");
-            }
-            self->gameState = 0;
-        }
+void printGameResult(Game* self) {
 
-        self->playerTurn++;
+    if(self->gameState == 1) {
+        printf("Le joueur 1 (X) gagne la partie !\n");
+    } else if(self->gameState == 2) {
+        printf("Le joueur 2 (O) gagne la partie !\n");
+    } else {
+        printf("Egalite ! Aucun gagnant\n");
+    }
 
 }
 
@@ -199,6 +206,7 @@ int computerVersusComputerGame(Game* self) {
     } while (self->gameState == -1);
 
     displayGrid(self->pg, self->size);
+    printGameResult(self);
     pthread_mutex_destroy(&mutex);
 
     return self->gameState;
@@ -214,5 +222,5 @@ int startGame(Game* self) {
     } else if(self->gameType == 3) {
         return computerVersusComputerGame(self);
     }
-
+    return -1;
 }
