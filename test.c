@@ -16,7 +16,7 @@ int main() {
 
     for(int i = 0; i < 1; i++) {
 
-        Game* game = Game__create(3, 3, 3);
+        Game* game = Game__create(3, 9, 4, true);
         result = startGame(game);
         printf("%d ", result);
         Game__destroy(game);

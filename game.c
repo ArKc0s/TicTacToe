@@ -26,6 +26,7 @@ typedef struct Game {
     int winCondition;
     PlayingGrid* pg;
     FILE* gameFile;
+    bool isLogged;
 
 } Game;
 
@@ -34,13 +35,14 @@ struct Data {
     int size;
     char mark;
     FILE* gameFile;
+    bool isLogged;
 };
 
 pthread_mutex_t mutex;
 char mark;
 int choice;
 
-void Game__init(Game* self, int type, int size, int winCondition) { //TODO: Possibilité de choisir le premier joueur
+void Game__init(Game* self, int type, int size, int winCondition, bool isLogged) { //TODO: Possibilité de choisir le premier joueur
 
     self->gameState = -1;
     self->playerTurn = 1;
@@ -49,26 +51,30 @@ void Game__init(Game* self, int type, int size, int winCondition) { //TODO: Poss
     self->pg = PlayingGrid__create(size*size);
     self->size = size;
     self->winCondition = winCondition;
+    self->isLogged = isLogged;
 
-    char str[256];
-    sprintf(str, "%lld", current_timestamp());
+    if(isLogged) {
+        char str[256];
+        sprintf(str, "%lld", current_timestamp());
 
-    char filename[275];
-    strcpy(filename, "games/game_");
-    strcat(filename, str);
-    strcat(filename, ".txt");
+        char filename[275];
+        strcpy(filename, "games/game_");
+        strcat(filename, str);
+        strcat(filename, ".txt");
 
-    self->gameFile = fopen(filename, "w");
-    fprintf(self->gameFile, "------ INIT -------\n#GameType=%d", self->gameType);
-    fprintf(self->gameFile, "\n#GridSize=%d", self->size);
-    fprintf(self->gameFile, "\n#WinCondition=%d", self->winCondition);
-    fprintf(self->gameFile, "\n#FirstPlayer=%d", self->playerTurn);
-    fprintf(self->gameFile, "\n----- ENDINIT -----\n\n");
+        self->gameFile = fopen(filename, "w");
+        fprintf(self->gameFile, "------ INIT -------\n# GameType=%d", self->gameType);
+        fprintf(self->gameFile, "\n# GridSize=%d", self->size);
+        fprintf(self->gameFile, "\n# WinCondition=%d", self->winCondition);
+        fprintf(self->gameFile, "\n# FirstPlayer=%d", self->playerTurn);
+        fprintf(self->gameFile, "\n----- ENDINIT -----\n\n");
+    }
+    
 }
 
-Game* Game__create(int type, int gridSize, int winCondition) {
+Game* Game__create(int type, int gridSize, int winCondition, bool isLogged) {
     Game* game = (Game*) malloc(sizeof(Game));
-    Game__init(game, type, gridSize, winCondition);
+    Game__init(game, type, gridSize, winCondition, isLogged);
 
     return game;
 }
@@ -100,7 +106,7 @@ void play(Game* self, char mark, int position) {
     self->movesCount++;
 }
 
-void randomPlay(PlayingGrid* pg, int size, char mark, FILE* gameFile) {
+void randomPlay(PlayingGrid* pg, int size, char mark, FILE* gameFile, bool isLogged) {
       
     do {
         choice = rand() % (size*size + 1);
@@ -109,7 +115,7 @@ void randomPlay(PlayingGrid* pg, int size, char mark, FILE* gameFile) {
     pg->grid[choice-1][0] = mark;
     pg->grid[choice-1][1] = ' ';
 
-    fprintf(gameFile, "- %c placed in position %d\n", mark, choice);
+    if(isLogged) fprintf(gameFile, "- %c placed in position %d\n", mark, choice);
 }
 
 void *critique(void *data) {
@@ -118,7 +124,7 @@ void *critique(void *data) {
 
     pthread_mutex_lock(&mutex);
     srand(current_timestamp());
-    randomPlay(d->pg, d->size, d->mark, d->gameFile);
+    randomPlay(d->pg, d->size, d->mark, d->gameFile, d->isLogged);
     pthread_mutex_unlock(&mutex);
 
     return NULL;
@@ -148,7 +154,14 @@ void printGameResult(Game* self) {
 }
 
 void logGameResult(Game* self) {
-    fprintf(self->gameFile, "----- ENDGAME -----\n");
+    fprintf(self->gameFile, "----- ENDGAME -----\n\n");
+    fprintf(self->gameFile, "----- RESULTS -----\n");
+    if(self->gameState == 0) {
+        fprintf(self->gameFile, "~ DRAW (No winner)\n");
+    } else {
+        fprintf(self->gameFile, "~ WINNER IS PLAYER %d\n", self->gameState);
+    }
+    fprintf(self->gameFile, "---- ENDRESULTS ---\n");
 }
 
 int oneVersusOneGame(Game* self) {
@@ -187,7 +200,7 @@ int oneVersusComputerGame(Game* self) {
             play(self, mark, choice);    
 
         } else {
-            randomPlay(self->pg, self->size, mark, self->gameFile);
+            randomPlay(self->pg, self->size, mark, self->gameFile, self->isLogged);
             self->movesCount++;
         }
 
@@ -219,6 +232,7 @@ int computerVersusComputerGame(Game* self, bool print) {
             d1.size = self->size;
             d1.mark = 'X';
             d1.gameFile = self->gameFile;
+            d1.isLogged = self->isLogged;
             pthread_create(&j1, NULL, critique, (void *) &d1);
             pthread_join(j1, NULL);
              
@@ -228,6 +242,7 @@ int computerVersusComputerGame(Game* self, bool print) {
             d2.size = self->size;
             d2.mark = 'O';
             d2.gameFile = self->gameFile;
+            d2.isLogged = self->isLogged;
             pthread_create(&j2, NULL, critique, (void *) &d2);
             pthread_join(j2, NULL);
 
@@ -243,7 +258,7 @@ int computerVersusComputerGame(Game* self, bool print) {
         printGameResult(self);
     }
 
-    logGameResult(self);
+    if(self->isLogged) logGameResult(self);
 
     pthread_mutex_destroy(&mutex);
 
@@ -253,7 +268,7 @@ int computerVersusComputerGame(Game* self, bool print) {
 
 int startGame(Game* self) {
 
-    fprintf(self->gameFile, "------ GAME -------\n");
+    if(self->isLogged) fprintf(self->gameFile, "------ GAME -------\n");
 
     if(self->gameType == 1) {
         return oneVersusOneGame(self);
