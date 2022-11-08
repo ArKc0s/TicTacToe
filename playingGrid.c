@@ -52,7 +52,7 @@ void PlayingGrid__destroy(PlayingGrid* pg) {
 
 void displayGrid(PlayingGrid* self, int size) {
 
-    system("clear");
+    system("cls");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
