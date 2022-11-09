@@ -1,0 +1,299 @@
+#include "playingGrid.c"
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <pthread.h>
+
+//TODO: Impossible de créer une grille supérieure a 9x9
+
+long long current_timestamp() {
+    struct timeval te; 
+    gettimeofday(&te, NULL);
+    long long milliseconds = te.tv_sec*1000LL + te.tv_usec/100;
+    return milliseconds;
+}
+
+typedef struct Game {
+    int gameState;
+    int playerTurn;
+    int movesCount;
+    int gameType;
+    int size;
+    int winCondition;
+    PlayingGrid* pg;
+    FILE* gameFile;
+    bool isLogged;
+
+} Game;
+
+struct Data {
+    PlayingGrid* pg;
+    int size;
+    char mark;
+    FILE* gameFile;
+    bool isLogged;
+};
+
+pthread_mutex_t mutex;
+char mark;
+int choice;
+
+// Function to initialise the game variables
+void Game__init(Game* self, int type, int size, int winCondition, int fisrtPlayer, bool isLogged) {
+
+    self->gameState = -1;
+    self->playerTurn = fisrtPlayer;
+    self->movesCount = 0;
+    self->gameType = type;
+    self->pg = PlayingGrid__create(size*size);
+    self->size = size;
+    self->winCondition = winCondition;
+    self->isLogged = isLogged;
+
+    if(isLogged) {
+        char str[256];
+        sprintf(str, "%lld", current_timestamp());
+
+        char filename[275];
+        strcpy(filename, "games/game_");
+        strcat(filename, str);
+        strcat(filename, ".txt");
+
+        self->gameFile = fopen(filename, "w");
+        fprintf(self->gameFile, "------ INIT -------\n# GameType=%d", self->gameType);
+        fprintf(self->gameFile, "\n# GridSize=%d", self->size);
+        fprintf(self->gameFile, "\n# WinCondition=%d", self->winCondition);
+        fprintf(self->gameFile, "\n# FirstPlayer=%d", self->playerTurn);
+        fprintf(self->gameFile, "\n----- ENDINIT -----\n\n");
+    }
+    
+}
+
+// Function to create a new game, allocating memory for it, and returning a pointer to it
+Game* Game__create(int type, int gridSize, int winCondition, int firstPlayer, bool isLogged) {
+    Game* game = (Game*) malloc(sizeof(Game));
+    Game__init(game, type, gridSize, winCondition, firstPlayer, isLogged);
+
+    return game;
+}
+
+// Function to reset the game variables
+void Game__reset(Game* self) {
+    PlayingGrid__reset(self->pg);
+}
+
+// Function to destroy the game, freeing the memory allocated for it
+void Game__destroy(Game* game) {
+  if (game) {
+    fclose(game->gameFile);
+    PlayingGrid__destroy(game->pg);
+    Game__reset(game);
+    free(game);
+  }
+}
+
+// Function to play a move, checking if the move is valid
+void play(Game* self, char mark, int position, FILE* gameFile, bool isLogged) {
+
+    if(isPlayable(position-1, self->pg->grid, self->size*self->size)) {
+        self->pg->grid[position-1][0] = mark;
+        self->pg->grid[position-1][1] = ' ';
+    } else {
+        printf("Case invalide");
+        self->playerTurn--;
+        self->movesCount--;
+    }
+
+    self->movesCount++;
+
+    if(isLogged) fprintf(gameFile, "- %c placed in position %d\n", mark, position);
+}
+
+// Function a random move, used by the computer
+void randomPlay(PlayingGrid* pg, int size, char mark, FILE* gameFile, bool isLogged) {
+      
+    do {
+        choice = rand() % (size*size + 1);
+    } while(!isPlayable(choice - 1, pg->grid, size*size));
+
+    pg->grid[choice-1][0] = mark;
+    pg->grid[choice-1][1] = ' ';
+
+    if(isLogged) fprintf(gameFile, "- %c placed in position %d\n", mark, choice);
+}
+
+// Function to lock access to datas during the thread execution
+void *critique(void *data) {
+
+    struct Data *d  = data;
+
+    pthread_mutex_lock(&mutex);
+    srand(current_timestamp());
+    randomPlay(d->pg, d->size, d->mark, d->gameFile, d->isLogged);
+    pthread_mutex_unlock(&mutex);
+
+    return NULL;
+}
+
+// Function to detect the end of the game
+void processState(Game* self) {
+
+    self->gameState = detectWin(self->pg, self->size, self->winCondition);
+
+    if (self->movesCount == self->size*self->size && self->gameState == -1) {
+        self->gameState = 0;
+    }
+    self->playerTurn++;
+
+}
+
+// Function to present the result of the game
+void printGameResult(Game* self) {
+
+    if(self->gameState == 1) {
+        printf("Le joueur 1 (X) gagne la partie !\n");
+    } else if(self->gameState == 2) {
+        printf("Le joueur 2 (O) gagne la partie !\n");
+    } else {
+        printf("Egalite ! Aucun gagnant\n");
+    }
+
+}
+
+// Function to add logs in the game file
+void logGameResult(Game* self) {
+    fprintf(self->gameFile, "----- ENDGAME -----\n\n");
+    fprintf(self->gameFile, "----- RESULTS -----\n");
+    if(self->gameState == 0) {
+        fprintf(self->gameFile, "~ DRAW (No winner)\n");
+    } else {
+        fprintf(self->gameFile, "~ WINNER IS PLAYER %d\n", self->gameState);
+    }
+    fprintf(self->gameFile, "---- ENDRESULTS ---\n");
+}
+
+// Function to play a game with a human player
+int oneVersusOneGame(Game* self) {
+
+    do {
+        displayGrid(self->pg, self->size);
+        self->playerTurn = (self->playerTurn % 2) ? 1 : 2;    
+
+
+        printf("Joueur %d, entrez un nombre: ", self->playerTurn);
+        scanf("%d", &choice);
+
+        mark = (self->playerTurn == 1) ? 'X' : 'O';
+        play(self, mark, choice, self->gameFile, self->isLogged);
+        processState(self);
+
+    } while (self->gameState == -1);
+
+    displayGrid(self->pg, self->size);
+    printGameResult(self);
+    return self->gameState;
+}
+
+// Function to play a game with a computer player
+int oneVersusComputerGame(Game* self) {
+
+    do {
+        displayGrid(self->pg, self->size);
+        self->playerTurn = (self->playerTurn % 2) ? 1 : 2;
+        mark = (self->playerTurn == 1) ? 'X' : 'O';
+
+        if(self->playerTurn == 1) {
+
+            printf("Joueur %d, entrez un nombre: ", self->playerTurn);
+            scanf("%d", &choice);
+
+            play(self, mark, choice, self->gameFile, self->isLogged);    
+
+        } else {
+            srand(current_timestamp());
+            randomPlay(self->pg, self->size, mark, self->gameFile, self->isLogged);
+            self->movesCount++;
+        }
+
+        processState(self);
+
+    } while (self->gameState == -1);
+
+    displayGrid(self->pg, self->size);
+    printGameResult(self);
+    return self->gameState;
+
+}
+
+// Function to watch a game with two computer players
+int computerVersusComputerGame(Game* self, bool print) {
+
+    pthread_t j1, j2;
+    struct Data d1, d2;
+
+    pthread_mutex_init(&mutex, NULL);
+    do {
+        if(print) {
+            displayGrid(self->pg, self->size);
+        }
+        self->playerTurn = (self->playerTurn % 2) ? 1 : 2;
+
+        if(self->playerTurn == 1) {
+
+            d1.pg = self->pg;
+            d1.size = self->size;
+            d1.mark = 'X';
+            d1.gameFile = self->gameFile;
+            d1.isLogged = self->isLogged;
+            pthread_create(&j1, NULL, critique, (void *) &d1);
+            pthread_join(j1, NULL);
+             
+        } else {
+
+            d2.pg = self->pg;
+            d2.size = self->size;
+            d2.mark = 'O';
+            d2.gameFile = self->gameFile;
+            d2.isLogged = self->isLogged;
+            pthread_create(&j2, NULL, critique, (void *) &d2);
+            pthread_join(j2, NULL);
+
+        }
+
+        self->movesCount++;
+        processState(self);
+
+    } while (self->gameState == -1);
+
+    if(print) {
+        displayGrid(self->pg, self->size);
+        printGameResult(self);
+    }
+
+    if(self->isLogged) logGameResult(self);
+
+    pthread_mutex_destroy(&mutex);
+
+    return self->gameState;
+
+}
+
+// Function to start the choosen game mode
+int startGame(Game* self) {
+
+    if(self->isLogged) fprintf(self->gameFile, "------ GAME -------\n");
+
+    if(self->gameType == 1) {
+        return oneVersusOneGame(self);
+    } else if(self->gameType == 2) {
+        return oneVersusComputerGame(self);
+    } else if(self->gameType == 3) {
+        return computerVersusComputerGame(self, true);
+    } else if(self->gameType == 4) {
+        return computerVersusComputerGame(self, false);
+    }
+    return -1;
+}
