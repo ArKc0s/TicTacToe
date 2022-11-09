@@ -7,6 +7,8 @@
 #include <sys/time.h>
 #include <pthread.h>
 
+//TODO: Impossible de créer une grille supérieure a 9x9
+
 long long current_timestamp() {
     struct timeval te; 
     gettimeofday(&te, NULL);
@@ -94,7 +96,7 @@ void Game__destroy(Game* game) {
 }
 
 // Function to play a move, checking if the move is valid
-void play(Game* self, char mark, int position) {
+void play(Game* self, char mark, int position, FILE* gameFile, bool isLogged) {
 
     if(isPlayable(position-1, self->pg->grid, self->size*self->size)) {
         self->pg->grid[position-1][0] = mark;
@@ -106,6 +108,8 @@ void play(Game* self, char mark, int position) {
     }
 
     self->movesCount++;
+
+    if(isLogged) fprintf(gameFile, "- %c placed in position %d\n", mark, position);
 }
 
 // Function a random move, used by the computer
@@ -183,7 +187,7 @@ int oneVersusOneGame(Game* self) {
         scanf("%d", &choice);
 
         mark = (self->playerTurn == 1) ? 'X' : 'O';
-        play(self, mark, choice);
+        play(self, mark, choice, self->gameFile, self->isLogged);
         processState(self);
 
     } while (self->gameState == -1);
@@ -206,9 +210,10 @@ int oneVersusComputerGame(Game* self) {
             printf("Joueur %d, entrez un nombre: ", self->playerTurn);
             scanf("%d", &choice);
 
-            play(self, mark, choice);    
+            play(self, mark, choice, self->gameFile, self->isLogged);    
 
         } else {
+            srand(current_timestamp());
             randomPlay(self->pg, self->size, mark, self->gameFile, self->isLogged);
             self->movesCount++;
         }
