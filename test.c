@@ -16,12 +16,12 @@ int main() {
     int draw=0;
 
     if (stat("games", &st) == -1) {
-        mkdir("games", 0700);
+        mkdir("games");
     }
 
-    for(int i = 0; i < 10000; i++) {
+    for(int i = 0; i < 1; i++) {
 
-        Game* game = Game__create(4, 3, 3, 2, false);
+        Game* game = Game__create(4, 3, 3, 2, true);
         result = startGame(game);
         if(result == 1) {
             j1++;
