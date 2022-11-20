@@ -1,61 +1,44 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include "app.h"
 
-#define MAX_GRID_SIZE 81
+//Décalration de variables globales pour la détection de victoire
+int numInRow = 0;
+int prevVal = 0;
 
-
-typedef struct PlayingGrid
-{
-    char grid[MAX_GRID_SIZE][2];
-    int gridNumbers[MAX_GRID_SIZE];
-    int isWon;
-
-} PlayingGrid;
-
-// Function to initialise the playing grid
-void PlayingGrid__init(PlayingGrid* self, int size) {
+void PlayingGrid__init(playingGrid_t* self, int size) {
 
     int length = snprintf( NULL, 0, "%d", size);
     char* str = malloc( length + 1 );
 
+    //Initialisaiton des nombres dans la grille, sous forme de char pour l'affichage
     for(int k = 0; k < size; k++) {
 
         snprintf(str, length + 1, "%d", k+1 );
         
         self->grid[k][0] = str[0];
         self->grid[k][1] = str[1];
-
-        self->gridNumbers[k] = k;
         
     }
 
     free(str);
-
-    self->isWon = -1;
 }
 
-// Function create the playing grid object allocating memory
-PlayingGrid* PlayingGrid__create(int size) {
-    PlayingGrid* pGrid = (PlayingGrid*) malloc(sizeof(PlayingGrid));
+playingGrid_t* PlayingGrid__create(int size) {
+    playingGrid_t* pGrid = (playingGrid_t*) malloc(sizeof(playingGrid_t));
     PlayingGrid__init(pGrid, size);
     return pGrid;
 }
 
-// Function to reset the playing grid
-void PlayingGrid__reset(PlayingGrid* self) {
+void PlayingGrid__reset(playingGrid_t* self) {
 }
 
-// Function to destroy the playing grid object freeing memory
-void PlayingGrid__destroy(PlayingGrid* pg) {
+void PlayingGrid__destroy(playingGrid_t* pg) {
   if (pg) {
      PlayingGrid__reset(pg);
      free(pg);
   }
 }
 
-// Function to display the playing grid, printing the grid to the console
-void displayGrid(PlayingGrid* self, int size) {
+void displayGrid(playingGrid_t* self, int size) {
 
     system("cls");
     printf("\n\n\tTic Tac Toe\n\n");
@@ -64,14 +47,18 @@ void displayGrid(PlayingGrid* self, int size) {
 
     int j;
 
+    //Boucle d'itération des lignes
     for(int row = 0; row < size; row++) {
 
+        //Affichage de la première partie de chaque line (ex:      |     |     )
         for(int i = 0; i < size-1; i++) {
             printf("     |");
         }
         printf("     \n");
-        
+
+        //Affichage de la première partie de chaque line (ex:  1  |  2  |  3  )
         for(j = 0; j < size-1; j++) {
+            //distinction de cas selon chiffre ou nombre >= 10 
             if(self->grid[j + (row*size)][1] == '\0') {
                 printf("  %c  |", self->grid[j + (row*size)][0]);
             } else {
@@ -79,14 +66,18 @@ void displayGrid(PlayingGrid* self, int size) {
             }
             
         }
+        //Affichage du dernier chiffre
         printf("  %c%c \n", self->grid[j + (row*size)][0], self->grid[j + (row*size)][1]);
     
 
+        //Si l'on est pas à la dernière ligne on affiche un séparateur de ligne
         if(row != size-1) {
             for(int i = 0; i < size-1; i++) {
                 printf("_____|");
             }
-             printf("_____\n");
+            //retour à la ligne pour le dernier
+            printf("_____\n");
+        //Sinon, denrière ligne, pas de séparateur
         } else {
             for(int i = 0; i < size-1; i++) {
                 printf("     |");
@@ -97,32 +88,33 @@ void displayGrid(PlayingGrid* self, int size) {
     }
 }
 
-int numInRow = 0;
-int prevVal = 0;
+int countNumInRow(playingGrid_t* self, int size, int winCondition, int index) {
 
-// Function to count the number of consecutive numbers in a row
-int countNumInRow(PlayingGrid* self, int size, int winCondition, int index) {
-
+    //Parse de l'identifiant du joueur (int) grace au symbole présent dans la case, si pas jouée alors 0
     int curVal = (self->grid[index][0] == 'X') ? 1 : (self->grid[index][0] == 'O') ? 2 : 0;
+    //Si la valeur courante n'est pas égale à la précédente alors on es tplus dans une suite de même carractère, on réinitialise le nombre de symboles à la suite à 1
     if(curVal != prevVal || curVal == 0) {
         prevVal = curVal;
         numInRow = 1;
+    //Sinon, on est toujours dans la meme suite alors on incrémente le nombre de symboles à la suite
     } else {
         numInRow++;
+        // Détection d'une victoire
         if(numInRow >= winCondition) {
             return curVal;
         }
     }
 
+    //Aucune victoire détectée
     return -1;
 }
 
-// Function to check if the game has been won
-int detectWin(PlayingGrid* self, int size, int winCondition) {
+int detectWin(playingGrid_t* self, int size, int winCondition) {
 
+    //resultat de la partie
     int result;
 
-    //colonnes
+    //parcours en colonnes
     for(int x = 0; x < size; x++) {
        prevVal=0;
         for(int y = 0; y < size; y++) {
@@ -133,7 +125,7 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
         }
     }
 
-    //lignes
+    //parcours en lignes
     for(int y = 0; y < size; y++) {
         prevVal = 0;
         for(int x = 0; x < size; x++) {
@@ -144,7 +136,7 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
         }
     }
 
-    //diag sup droite
+    //parcours diagonale supérieure droite
     for(int x=0; x < size; x++) {
         prevVal = 0;
         for(int i=x; i < (size*size) - (x*size) ; i+=size+1) {
@@ -155,7 +147,7 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
         }
     }
 
-    //diag inf droite
+    //parcours diagonale inférieure droite
     for(int y=1; y < size; y++) {
         prevVal = 0;
         for(int i=y*size; i < (size*size) - y ; i+=size+1) {
@@ -166,7 +158,7 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
         }
     }
 
-    //diag sup gauche
+    //parcours diagonale supérieure gauche
     for(int x=0; x < size; x++) {
         prevVal = 0;
 
@@ -178,7 +170,7 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
         }
     }
 
-    //diag inf gauche
+    //parcours diagonale inférieure gauche
     for(int y=1; y < size; y++) {
         prevVal = 0;
         for(int i=(y+1)*(size)-1; i < size*size ; i+=size-1) {
@@ -189,12 +181,13 @@ int detectWin(PlayingGrid* self, int size, int winCondition) {
         }
     }
 
+    //pas de victoire, la partie doit continuer
     return -1;
 
 }
 
-// Function to check if the box is already taken
 bool isPlayable(int cell, char grid[][2], int size) {
+    //Si symbole X ou O absent alors la case est jouable
     if(cell >= 0 && cell <= size-1 && grid[cell][0] != 'X' && grid[cell][0] != 'O') {
         return true;
     }
