@@ -1,9 +1,4 @@
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include "game.c"
+#include "app.h"
 
 // Scores
 int gameResult;
@@ -19,7 +14,7 @@ int firstPlayer;
 int isLogged;
 
 //Instance de jeu
-Game* game;
+game_t* game;
 
 struct stat st = {0};
 
@@ -27,10 +22,10 @@ struct stat st = {0};
 int main() {
 
     if (stat("games", &st) == -1) {
-        mkdir("games");
+        mkdir("games", 0700);
     }
 
-    // Print the menu
+    // Affichage du menu
     printf("Welcome to the Tic Tac Toe game !\n");
     printf("1. Demarrer une partie 1vs\n");
     printf("2. Demarrer une partie contre l'ordinateur\n");
@@ -38,8 +33,11 @@ int main() {
     printf("0. Quitter\n");
     printf("Entrez votre choix: ");
 
-    // Get the user choice
     scanf("%d", &choiceMenu);
+
+    if(choiceMenu == 0) {
+        return 0;
+    }
 
     do {
         system("cls");
@@ -68,7 +66,7 @@ int main() {
     bool isLoggedB = isLogged != 0;
 
 
-    // Check if the user choice is valid
+    // Lancement de partie en fonction du choix
     if (choiceMenu == 1) {
 
         do {
@@ -89,7 +87,7 @@ int main() {
             printf("Egalites: %d\n", draw);
 
 
-            printf("Do you want to play again ? (1 = yes, 0 = no)\n");
+            printf("Voulez-vous rejouer ? (1 = yes, 0 = no)\n");
             scanf("%d", &choiceMenu);
 
         } while (choiceMenu == 1);
@@ -116,7 +114,7 @@ int main() {
             printf("Egalites: %d\n", draw);
 
 
-            printf("Do you want to play again ? (1 = yes, 0 = no)\n");
+            printf("Voulez-vous rejouer ? (1 = yes, 0 = no)\n");
             scanf("%d", &choiceMenu);
 
         } while (choiceMenu == 1);
@@ -142,11 +140,13 @@ int main() {
             printf("Player 2 score: %d\n", scorePlayer2);
             printf("Egalites: %d\n", draw);
 
-            printf("Do you want to play again ? (1 = yes, 0 = no)\n");
+            printf("Voulez-vous rejouer ? (1 = yes, 0 = no)\n");
             scanf("%d", &choiceMenu);
 
         } while (choiceMenu == 1);
         
         return 0;
-    } 
+    } else {
+        return 0;
+    }
 }
